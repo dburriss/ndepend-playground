@@ -1,0 +1,16 @@
+//let disposableMembers = m.Parent.ChildMembers.Where(x => x.IsField && x.AsField.FieldType.Implement("System.IDisposable")).Select(x => x.AsField)
+
+// kinda makes sense but doesn't work
+// <Name>IO methods should return Result</Name>
+let iDisposable = ThirdParty.Types.WithFullName("System.IDisposable").FirstOrDefault()
+where iDisposable != null
+
+from m in Methods
+let disposableMembers = Fields.Where(f => f.FieldType.Implement(iDisposable))
+let usesDisposable = disposableMembers.Any(x => m.IsUsingField(x))
+let noResult = !m.ReturnTypeIs("simple.Result".AllowNoMatch())
+where m.IsPublic
+&& !m.IsConstructor
+&& usesDisposable
+&& noResult
+select m
